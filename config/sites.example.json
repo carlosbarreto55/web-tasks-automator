@@ -1,0 +1,27 @@
+{
+  "sites": [
+    {
+      "name": "example-site",
+      "url": "https://example.com/login",
+      "credentials": {
+        "username": "your_username",
+        "password": "your_password"
+      },
+      "selectors": {
+        "username_input": "#username",
+        "password_input": "#password",
+        "submit_button": "button[type='submit']",
+        "success_indicator": ".dashboard",
+        "failure_indicator": ".error-message"
+      },
+      "scrape": {
+        "target_url": "https://example.com/dashboard",
+        "data_selectors": {
+          "account_balance": ".balance-display",
+          "last_login": ".last-login",
+          "notifications": [".notification-item", ".alert-banner"]
+        }
+      }
+    }
+  ]
+}
