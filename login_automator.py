@@ -16,7 +16,6 @@ from src.reporter import LoginResult, Reporter
 MAX_RETRIES = 3
 RETRY_DELAY = 5
 DEFAULT_CONFIG = "config/sites.json"
-SCRAPED_OUTPUT = "scrapped-content.json"
 
 
 def _build_result(name: str, status: str, data: dict | None = None,
@@ -169,12 +168,7 @@ def main():
     if args.report_file:
         args.report_file.parent.mkdir(parents=True, exist_ok=True)
 
-    # Clean scraped-content.json at start of run to avoid stale data
-    with open(SCRAPED_OUTPUT, "w") as f:
-        json.dump({}, f)
-
     overall = "success"
-    scraped_data: dict[str, dict] = {}
     for site in sites:
         if verbose:
             print(f"=== Processing: {site['name']} ===", file=sys.stderr)
@@ -183,12 +177,6 @@ def main():
                               cookies_file=args.cookies_file,
                               save_cookies_path=args.save_cookies)
         print(json.dumps(result))
-
-        if result["status"] == "success" and result.get("data"):
-            scraped_data[result["site"]] = {
-                "timestamp": result["timestamp"],
-                "data": result["data"],
-            }
 
         entry = LoginResult(
             site=result["site"],
@@ -203,9 +191,6 @@ def main():
             overall = "failed"
         if verbose:
             print(f"--- Result: {result['status']} ---\n", file=sys.stderr)
-
-    with open(SCRAPED_OUTPUT, "w") as f:
-        json.dump(scraped_data, f, indent=2, ensure_ascii=False)
 
     sys.exit(0 if overall == "success" else 1)
 

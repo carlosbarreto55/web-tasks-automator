@@ -4,3 +4,4 @@ scrapped-content.json
 __pycache__/
 *.pyc
 .pytest_cache/
+.opencode/
