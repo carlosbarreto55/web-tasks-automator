@@ -2,6 +2,7 @@ config/sites.json
 scrapped-content.json
 output.txt
 scraped_page.txt
+it/last-navtest-output.txt
 .venv/
 __pycache__/
 *.pyc
