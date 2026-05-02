@@ -1,5 +1,7 @@
 config/sites.json
 scrapped-content.json
+output.txt
+scraped_page.txt
 .venv/
 __pycache__/
 *.pyc

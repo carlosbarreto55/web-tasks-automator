@@ -14,8 +14,13 @@
         "success_indicator": ".dashboard",
         "failure_indicator": ".error-message"
       },
+      "navigate": [
+        {"click": ".menu-reports", "wait_for": ".reports-page"},
+        {"click": ".report-item:first-child", "wait_after": 1},
+        {"url": "https://example.com/dashboard/settings"}
+      ],
       "scrape": {
-        "target_url": "https://example.com/dashboard",
+        "target_url": null,
         "data_selectors": {
           "account_balance": ".balance-display",
           "last_login": ".last-login",

@@ -10,6 +10,7 @@ from src.config import load_config, validate_site
 from src.classifier import classify_error
 from src.driver import create_driver
 from src.login import do_login, load_cookies, apply_cookies, save_cookies
+from src.navigator import Navigator
 from src.scraper import Scraper
 from src.reporter import LoginResult, Reporter
 
@@ -37,6 +38,12 @@ def _run_scrape_only(driver, site: dict, cookies_file: Path, verbose: bool,
     if verbose:
         print(f"  [cookies] loading {len(cookies)} cookie(s) from {cookies_file}", file=sys.stderr)
     apply_cookies(driver, cookies, base_url)
+
+    navigate_steps = site.get("navigate")
+    if navigate_steps:
+        nav = Navigator(driver, navigate_steps)
+        nav.run(verbose)
+
     scraper = Scraper(driver)
     data = scraper.scrape(scrape_cfg, verbose)
     return _build_result(name, "success", data)
@@ -63,6 +70,11 @@ def process_site(site: dict, verbose: bool, scrape_only: bool = False,
                     if verbose:
                         print(f"  [cookies] saving to {save_cookies_path}", file=sys.stderr)
                     save_cookies(driver, save_cookies_path)
+
+                navigate_steps = site.get("navigate")
+                if navigate_steps:
+                    nav = Navigator(driver, navigate_steps)
+                    nav.run(verbose)
 
                 scraper = Scraper(driver)
                 scrape_cfg = site.get("scrape", {})
