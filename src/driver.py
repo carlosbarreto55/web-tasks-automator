@@ -34,9 +34,10 @@ def _find_chromedriver() -> str | None:
     return None
 
 
-def create_driver() -> webdriver.Chrome:
+def create_driver(headless: bool = True) -> webdriver.Chrome:
     opts = Options()
-    opts.add_argument("--headless=new")
+    if headless:
+        opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--disable-gpu")
