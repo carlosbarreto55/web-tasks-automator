@@ -69,3 +69,7 @@ class Scraper:
                           file=sys.stderr)
 
         return data
+
+    def scrape_full_page(self) -> str:
+        body = self.driver.find_element(By.TAG_NAME, "body")
+        return body.text.strip()
