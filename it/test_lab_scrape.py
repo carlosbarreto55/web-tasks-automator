@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from src.scraper import Scraper
-from src.lab_finder import LabFinder
+from src.scraping.scraper import Scraper
+from src.scraping.lab_finder import LabFinder
 
 
 BOOKS_HOMEPAGE = "https://books.toscrape.com/"

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 from selenium.webdriver.common.by import By
 
-from src.lab_finder import LabFinder
+from src.scraping.lab_finder import LabFinder
 
 
 class TestLabFinderLocatorType:

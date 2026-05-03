@@ -7,16 +7,16 @@ import sys
 import time
 from pathlib import Path
 
-from src.config import load_config, validate_site
-from src.classifier import classify_error
-from src.driver import create_driver
-from src.login import do_login, load_cookies, apply_cookies, save_cookies
-from src.navigator import Navigator
-from src.scraper import Scraper
-from src.lab_finder import LabFinder
+from src.config.config import load_config, validate_site
+from src.login.classifier import classify_error
+from src.login.driver import create_driver
+from src.login.login import do_login, load_cookies, apply_cookies, save_cookies
+from src.scraping.navigator import Navigator
+from src.scraping.scraper import Scraper
+from src.scraping.lab_finder import LabFinder
 from src.reporter import LoginResult, Reporter
-from src.ai_client import OpenAIClient, OllamaClient
-from src.solver import LabSolver
+from src.ai.ai_client import OpenAIClient, OllamaClient
+from src.ai.solver import LabSolver
 
 MAX_RETRIES = 3
 RETRY_DELAY = 5

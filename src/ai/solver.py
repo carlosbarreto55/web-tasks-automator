@@ -2,7 +2,7 @@ import re
 import sys
 from pathlib import Path
 
-from src.ai_client import AIClient
+from src.ai.ai_client import AIClient
 
 SOLVE_SYSTEM_PROMPT = (
     "You are a Java programming tutor. Output ONLY the solution code for the "

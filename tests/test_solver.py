@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.solver import LabSolver
+from src.ai.solver import LabSolver
 
 
 class MockClient:

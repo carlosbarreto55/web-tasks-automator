@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-from src.scraper import Scraper
+from src.scraping.scraper import Scraper
 
 
 class TestScraperExtractSingle:

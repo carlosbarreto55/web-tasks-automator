@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-from src.ai_client import AIClient, OpenAIClient, OllamaClient, _is_network_error
+from src.ai.ai_client import AIClient, OpenAIClient, OllamaClient, _is_network_error
 
 
 class TestIsNetworkError:
