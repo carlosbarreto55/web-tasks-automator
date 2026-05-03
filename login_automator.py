@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -14,6 +15,8 @@ from src.navigator import Navigator
 from src.scraper import Scraper
 from src.lab_finder import LabFinder
 from src.reporter import LoginResult, Reporter
+from src.ai_client import OpenAIClient, OllamaClient
+from src.solver import LabSolver
 
 MAX_RETRIES = 3
 RETRY_DELAY = 5
@@ -63,8 +66,50 @@ def _process_labs(driver, site: dict, verbose: bool):
               file=sys.stderr)
 
 
+def _process_solve(site: dict, verbose: bool):
+    labs_cfg = site.get("labs")
+    if not labs_cfg:
+        return
+    ai_cfg = labs_cfg.get("ai")
+    if not ai_cfg:
+        if verbose:
+            print("  [solve] no ai config, skipping", file=sys.stderr)
+        return
+
+    provider = ai_cfg.get("provider", "opencode")
+    model = ai_cfg.get("model", "deepseek-v4-pro")
+    output_dir = Path(ai_cfg.get("output_dir", "output/solutions"))
+    lab_file = Path(labs_cfg.get("output_file", "last-lab-content.txt"))
+
+    if not lab_file.exists():
+        if verbose:
+            print(f"  [solve] lab file not found: {lab_file}, skipping",
+                  file=sys.stderr)
+        return
+
+    if provider in ("opencode", "openai"):
+        base_url = ai_cfg.get("base_url")
+        api_key = os.getenv("OPENCODE_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            print(json.dumps({"error": f"Site '{site['name']}': --solve requires OPENCODE_API_KEY or OPENAI_API_KEY env var"}),
+                  file=sys.stderr)
+            return {"solved": [], "failed": ["missing_api_key"]}
+        client = OpenAIClient(model=model, base_url=base_url)
+    elif provider == "ollama":
+        base_url = ai_cfg.get("base_url")
+        client = OllamaClient(model=model, base_url=base_url)
+    else:
+        if verbose:
+            print(f"  [solve] unknown provider '{provider}', skipping",
+                  file=sys.stderr)
+        return
+
+    solver = LabSolver(client=client, model=model, output_dir=output_dir)
+    return solver.solve(lab_file, verbose=verbose)
+
+
 def _run_scrape_only(driver, site: dict, cookies_file: Path, verbose: bool,
-                     name: str) -> dict:
+                     name: str, solve: bool = False) -> dict:
     cookies = load_cookies(cookies_file)
     scrape_cfg = site.get("scrape", {})
     base_url = scrape_cfg.get("target_url") or site["url"]
@@ -80,12 +125,15 @@ def _run_scrape_only(driver, site: dict, cookies_file: Path, verbose: bool,
     scraper = Scraper(driver)
     data = scraper.scrape(scrape_cfg, verbose)
     _process_labs(driver, site, verbose)
+    if solve:
+        _process_solve(site, verbose)
     return _build_result(name, "success", data)
 
 
 def process_site(site: dict, verbose: bool, scrape_only: bool = False,
                  cookies_file: Path | None = None,
-                 save_cookies_path: Path | None = None) -> dict:
+                 save_cookies_path: Path | None = None,
+                 solve: bool = False) -> dict:
     name = site["name"]
     last_error = None
 
@@ -95,7 +143,7 @@ def process_site(site: dict, verbose: bool, scrape_only: bool = False,
             driver = create_driver()
 
             if scrape_only and cookies_file:
-                return _run_scrape_only(driver, site, cookies_file, verbose, name)
+                return _run_scrape_only(driver, site, cookies_file, verbose, name, solve=solve)
 
             ok, msg = do_login(driver, site, verbose)
 
@@ -114,6 +162,8 @@ def process_site(site: dict, verbose: bool, scrape_only: bool = False,
                 scrape_cfg = site.get("scrape", {})
                 data = scraper.scrape(scrape_cfg, verbose)
                 _process_labs(driver, site, verbose)
+                if solve:
+                    _process_solve(site, verbose)
                 return _build_result(name, "success", data)
             else:
                 return _build_result(name, "failed", error=msg)
@@ -164,6 +214,9 @@ def _validate_args(args):
 
 
 def main():
+    from dotenv import load_dotenv
+    load_dotenv()
+
     parser = argparse.ArgumentParser(description="Automated website login + scraping")
     parser.add_argument("--config", default=DEFAULT_CONFIG,
                         help=f"Path to config JSON (default: {DEFAULT_CONFIG})")
@@ -172,6 +225,8 @@ def main():
                         help="Suppress debug output")
     parser.add_argument("--scrape-only", action="store_true",
                         help="Skip login; reuse session via --cookies-file")
+    parser.add_argument("--solve", action="store_true",
+                        help="Send scraped lab content to AI and save solution files")
     parser.add_argument("--cookies-file", type=Path,
                         help="Path to JSON cookies file (required with --scrape-only)")
     parser.add_argument("--save-cookies", type=Path,
@@ -222,7 +277,8 @@ def main():
         result = process_site(site, verbose,
                               scrape_only=args.scrape_only,
                               cookies_file=args.cookies_file,
-                              save_cookies_path=args.save_cookies)
+                              save_cookies_path=args.save_cookies,
+                              solve=args.solve)
         print(json.dumps(result))
 
         entry = LoginResult(
