@@ -12,6 +12,7 @@ from src.driver import create_driver
 from src.login import do_login, load_cookies, apply_cookies, save_cookies
 from src.navigator import Navigator
 from src.scraper import Scraper
+from src.lab_finder import LabFinder
 from src.reporter import LoginResult, Reporter
 
 MAX_RETRIES = 3
@@ -30,6 +31,38 @@ def _build_result(name: str, status: str, data: dict | None = None,
     return result
 
 
+def _process_labs(driver, site: dict, verbose: bool):
+    labs_cfg = site.get("labs")
+    if not labs_cfg:
+        return
+    selector = labs_cfg.get("lab_link_selector")
+    if not selector:
+        if verbose:
+            print("  [labs] no lab_link_selector configured, skipping",
+                  file=sys.stderr)
+        return
+
+    locator_type = labs_cfg.get("locator_type", "css")
+    finder = LabFinder(driver, locator_type=locator_type)
+
+    lab_url = finder.get_last_lab_url(selector, verbose=verbose)
+    if lab_url is None:
+        if verbose:
+            print("  [labs] no lab URL found, skipping",
+                  file=sys.stderr)
+        return
+
+    scraper = Scraper(driver)
+    scraper.navigate(lab_url, verbose=verbose)
+
+    content = scraper.scrape_full_page()
+    output_file = Path(labs_cfg.get("output_file", "last-lab-content.txt"))
+    output_file.write_text(content, encoding="utf-8")
+    if verbose:
+        print(f"  [labs] saved {len(content)} chars to {output_file}",
+              file=sys.stderr)
+
+
 def _run_scrape_only(driver, site: dict, cookies_file: Path, verbose: bool,
                      name: str) -> dict:
     cookies = load_cookies(cookies_file)
@@ -46,6 +79,7 @@ def _run_scrape_only(driver, site: dict, cookies_file: Path, verbose: bool,
 
     scraper = Scraper(driver)
     data = scraper.scrape(scrape_cfg, verbose)
+    _process_labs(driver, site, verbose)
     return _build_result(name, "success", data)
 
 
@@ -79,6 +113,7 @@ def process_site(site: dict, verbose: bool, scrape_only: bool = False,
                 scraper = Scraper(driver)
                 scrape_cfg = site.get("scrape", {})
                 data = scraper.scrape(scrape_cfg, verbose)
+                _process_labs(driver, site, verbose)
                 return _build_result(name, "success", data)
             else:
                 return _build_result(name, "failed", error=msg)
