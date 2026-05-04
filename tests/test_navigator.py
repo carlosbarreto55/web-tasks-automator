@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch, call
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementNotInteractableException
 
-from src.navigator import Navigator
+from src.scraping.navigator import Navigator
 
 
 class TestNavigatorClick:
@@ -67,7 +67,7 @@ class TestNavigatorWaitFor:
         steps = [{"click": ".btn", "wait_for": ".result"}]
         nav = Navigator(driver, steps)
 
-        with patch("src.navigator.WebDriverWait") as mock_wait:
+        with patch("src.scraping.navigator.WebDriverWait") as mock_wait:
             nav.run()
             mock_wait.assert_called_once_with(driver, 10)
 
@@ -79,7 +79,7 @@ class TestNavigatorWaitFor:
         steps = [{"click": ".btn", "wait_for": ".result", "wait_timeout": 15}]
         nav = Navigator(driver, steps)
 
-        with patch("src.navigator.WebDriverWait") as mock_wait:
+        with patch("src.scraping.navigator.WebDriverWait") as mock_wait:
             nav.run()
             mock_wait.assert_called_once_with(driver, 15)
 
@@ -91,7 +91,7 @@ class TestNavigatorWaitFor:
         steps = [{"click": ".btn", "wait_for": ".never-appears"}]
         nav = Navigator(driver, steps)
 
-        with patch("src.navigator.WebDriverWait") as mock_wait_cls:
+        with patch("src.scraping.navigator.WebDriverWait") as mock_wait_cls:
             mock_wait = MagicMock()
             mock_wait.until.side_effect = TimeoutException()
             mock_wait_cls.return_value = mock_wait
@@ -157,7 +157,7 @@ class TestNavigatorRun:
         nav = Navigator(driver, steps)
 
         with patch("time.sleep") as mock_sleep, \
-             patch("src.navigator.WebDriverWait") as mock_wait:
+             patch("src.scraping.navigator.WebDriverWait") as mock_wait:
             nav.run()
             mock_el.click.assert_called_once()
             mock_wait.assert_called_once()
@@ -195,7 +195,7 @@ class TestNavigatorRun:
         nav = Navigator(driver, steps)
 
         with patch("time.sleep") as mock_sleep, \
-             patch("src.navigator.WebDriverWait") as mock_wait:
+             patch("src.scraping.navigator.WebDriverWait") as mock_wait:
             nav.run()
             driver.get.assert_called_once_with("https://example.com/page")
             mock_sleep.assert_not_called()
@@ -211,7 +211,7 @@ class TestNavigatorRun:
         nav = Navigator(driver, steps)
 
         with patch("time.sleep") as mock_sleep, \
-             patch("src.navigator.WebDriverWait") as mock_wait:
+             patch("src.scraping.navigator.WebDriverWait") as mock_wait:
             nav.run()
             mock_wait.assert_called_once()
             mock_sleep.assert_not_called()

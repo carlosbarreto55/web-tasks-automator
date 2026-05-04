@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from src.driver import create_driver
+from src.login.driver import create_driver
 
 
 NAVTEST_OUTPUT = Path(__file__).parent / "last-navtest-output.txt"
