@@ -1,4 +1,5 @@
 config/sites.json
+config/telegram.json
 scrapped-content.json
 output.txt
 scraped_page.txt
