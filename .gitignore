@@ -1,5 +1,6 @@
 config/sites.json
 config/telegram.json
+config/telegram.integration.json
 scrapped-content.json
 output.txt
 scraped_page.txt
