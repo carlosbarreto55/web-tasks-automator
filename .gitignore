@@ -1,10 +1,15 @@
 config/sites.json
+config/telegram.json
+config/telegram.integration.json
 scrapped-content.json
 output.txt
 scraped_page.txt
+last-lab-content.txt
 it/last-navtest-output.txt
 .venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .opencode/
+.env
+output/

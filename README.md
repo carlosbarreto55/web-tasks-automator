@@ -1,4 +1,6 @@
 # web-task-automation-engine
+======
+
 
 A Python + Selenium CLI tool that automates website interactions through a config-driven pipeline: login, navigate, scrape, and optionally solve lab assignments with AI.
 
@@ -248,9 +250,10 @@ This project explores:
 
 ## Disclaimer
 
-This project is intended for studying automation, scraping, and AI workflows.
+This project is intended for studying automation assist, scraping, and AI workflows.
 It is not intended for academic dishonesty or misuse.
 
+=======
 ## License
 
 MIT

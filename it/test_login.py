@@ -1,6 +1,6 @@
 import pytest
 
-from src.login import do_login
+from src.login.login import do_login
 
 
 THE_INTERNET_CONFIG = {

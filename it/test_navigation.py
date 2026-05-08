@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from src.navigator import Navigator
-from src.scraper import Scraper
+from src.scraping.navigator import Navigator
+from src.scraping.scraper import Scraper
 
 
 _OUTPUT = Path(__file__).parent / "last-navtest-output.txt"

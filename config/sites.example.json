@@ -26,6 +26,16 @@
           "last_login": ".last-login",
           "notifications": [".notification-item", ".alert-banner"]
         }
+      },
+      "labs": {
+        "lab_link_selector": ".lab-list a:last-child",
+        "locator_type": "css",
+        "output_file": "last-lab-content.txt",
+        "ai": {
+          "provider": "opencode",
+          "model": "deepseek-v4-pro",
+          "output_dir": "/mnt/c/Users/Carlos/Downloads/PP/automator-solutions"
+        }
       }
     }
   ]

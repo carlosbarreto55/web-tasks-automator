@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-from src.scraper import Scraper
+from src.scraping.scraper import Scraper
 
 
 class TestScraperExtractSingle:
@@ -208,3 +208,17 @@ class TestScraperNavigate:
 
         scraper.navigate("https://example.com/page")
         driver.get.assert_called_once_with("https://example.com/page")
+
+
+class TestScraperFullPage:
+    def test_returns_body_text_stripped(self):
+        driver = MagicMock()
+        mock_body = MagicMock()
+        mock_body.text = "  Full page content\n\n  "
+        driver.find_element.return_value = mock_body
+
+        scraper = Scraper(driver)
+        result = scraper.scrape_full_page()
+
+        assert result == "Full page content"
+        driver.find_element.assert_called_once_with(By.TAG_NAME, "body")
