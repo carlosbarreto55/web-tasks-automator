@@ -9,6 +9,7 @@ A Python + Selenium CLI tool that automates website interactions through a confi
 - **Data scraping** — extract page content via CSS selectors (single values or multi-element flat lists)
 - **Lab assignment scraping** — discover and click the latest assignment link, scrape the full page body
 - **AI-powered solving** — send scraped lab content to an AI provider (OpenCode, OpenAI, or Ollama) and save generated solution files
+- **Telegram notifications** — send scraped lab statements and AI-generated solutions to a Telegram chat via bot
 - **Session reuse** — save and restore cookies to skip login on subsequent runs
 - **Multi-site batch processing** — process multiple sites in a single invocation, with per-site JSON output
 - **Retry logic** — classifies errors as client (fail fast) or network (retry up to 3x with fresh browser), so transient issues don't kill the run
@@ -63,13 +64,91 @@ Optional blocks:
 - `labs` — `lab_link_selector`, `locator_type` (`css` or `xpath`), `output_file`
 - `labs.ai` — `provider` (`opencode`/`openai`/`ollama`), `model`, `output_dir`
 
-## Usage
+### Telegram configuration (`config/telegram.json`)
+
+Copy the template and fill in your bot credentials:
+
+```bash
+cp config/telegram.example.json config/telegram.json
+```
+
+Fields:
+- `enabled` — must be `true` for notifications to fire
+- `bot_token` — your Telegram bot token (obtained from [@BotFather](https://t.me/BotFather))
+- `chat_id` — the target chat ID (your user ID or group ID)
+
+`config/telegram.json` contains the bot token and is gitignored.
+
+## How to Use
+
+### Quick start — full pipeline
+
+```bash
+python login_automator.py --solve --notify
+```
+
+This single command:
+1. Opens a headless Chrome browser
+2. Logs into the target site using the credentials in `config/sites.json`
+3. Navigates through the post-login steps (clicks, waits) defined in the config
+4. Finds and clicks the last lab/assignment link
+5. Scrapes the full lab content and saves it to a file
+6. Sends the lab statement to your Telegram chat
+7. Feeds each lab question to the AI provider and saves the generated solution files
+8. Sends the solutions to your Telegram chat
+
+### Step by step
+
+1. **Install dependencies**
+
+   ```bash
+   git clone <repo-url>
+   cd login-automator
+   pip install -r requirements.txt
+   ```
+
+2. **Configure the target site**
+
+   ```bash
+   cp config/sites.example.json config/sites.json
+   # Edit config/sites.json with your credentials and navigation steps
+   ```
+
+   Required per site: `name`, `url`, `credentials.{username, password}`, and all 5 `selectors.*` fields. Add optional `navigate`, `scrape`, and `labs` blocks to control post-login behavior.
+
+3. **Set up AI solving (optional)**
+
+   Create a `.env` file:
+   ```ini
+   OPENCODE_API_KEY=sk-...
+   ```
+
+   Supported providers (configured in `sites.json` under `labs.ai`): `opencode`, `openai`, `ollama`.
+
+4. **Set up Telegram notifications (optional)**
+
+   ```bash
+   cp config/telegram.example.json config/telegram.json
+   # Edit config/telegram.json with your bot_token and chat_id
+   ```
+
+   Create a bot via [@BotFather](https://t.me/BotFather) on Telegram and get your chat ID.
+
+5. **Run**
+
+   ```bash
+   # Full run: login → scrape → AI-solve → Telegram notify
+   python login_automator.py --solve --notify
+
+   # Skip login on subsequent runs (reuse saved session)
+   python login_automator.py --scrape-only --cookies-file cookies.json --solve --notify
+   ```
+
+### CLI Reference
 
 ```bash
 python login_automator.py [OPTIONS]
 ```
-
-### CLI Options
 
 | Flag | Purpose |
 |------|---------|
@@ -78,9 +157,11 @@ python login_automator.py [OPTIONS]
 | `--no-verbose` | Suppress debug output to stderr |
 | `--scrape-only` | Skip login; reuse existing session cookies |
 | `--solve` | Send scraped lab content to AI and save solution files |
+| `--notify` | Send results to Telegram |
 | `--cookies-file PATH` | Load cookies JSON (required with `--scrape-only`) |
 | `--save-cookies PATH` | Save session cookies after successful login |
 | `--report-file PATH` | Append human-readable report to a file |
+| `--telegram-config PATH` | Path to Telegram config (default: `config/telegram.json`) |
 
 ### Examples
 
@@ -93,6 +174,9 @@ python login_automator.py --site my-portal --no-verbose
 
 # Reuse a saved session to scrape labs and generate AI solutions
 python login_automator.py --scrape-only --cookies-file cookies.json --solve
+
+# Full pipeline: login, solve with AI, send to Telegram, save cookies
+python login_automator.py --solve --notify --save-cookies cookies.json
 
 # Login, save cookies for later reuse, and write a report
 python login_automator.py --save-cookies cookies.json --report-file report.txt
@@ -121,6 +205,9 @@ src/
   ai/
     ai_client.py                # OpenAI-compatible + Ollama API clients
     solver.py                   # AI-powered lab question solver
+  notifications/
+    notifier.py                 # Notification orchestration (Telegram)
+    telegram.py                 # Telegram Bot API client
   reporter.py                   # Human-readable report formatter
 config/
   sites.example.json            # Canonical config schema
