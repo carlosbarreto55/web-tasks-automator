@@ -1,4 +1,4 @@
-# login-automator
+# web-task-automation-engine
 
 A Python + Selenium CLI tool that automates website interactions through a config-driven pipeline: login, navigate, scrape, and optionally solve lab assignments with AI.
 
@@ -238,6 +238,18 @@ Integration tests use public sites (`the-internet.herokuapp.com`, `books.toscrap
 - `config/sites.json` is gitignored and never committed
 - Credential values never appear in stdout, stderr, or reports
 - API keys are loaded from `.env` via `python-dotenv`
+
+## Why this project matters
+
+This project explores:
+- Automating real-world workflows across web platforms
+- Integrating LLMs into automation pipelines
+- Designing resilient automation systems with retry logic and state persistence
+
+## Disclaimer
+
+This project is intended for studying automation, scraping, and AI workflows.
+It is not intended for academic dishonesty or misuse.
 
 ## License
 
