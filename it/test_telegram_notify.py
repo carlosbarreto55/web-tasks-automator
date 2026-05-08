@@ -6,7 +6,7 @@ import pytest
 
 from src.config.notifications_config import load_telegram_config, create_notifier
 
-TELEGRAM_CONFIG = Path("config/telegram.json")
+TELEGRAM_CONFIG = Path("config/telegram.integration.json")
 
 
 @pytest.mark.integration
